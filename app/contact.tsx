@@ -16,11 +16,9 @@ export default function Contact() {
           {contacts.map((person) => (
             <div key={`${person.firstName}-${person.lastName}`} className="flex items-center gap-6">
               <div
-                className="flex h-24 w-24 shrink-0 items-center justify-center rounded-lg bg-brand/15 text-sm text-brand/60"
+                className="h-24 w-24 shrink-0 rounded-lg bg-brand/15"
                 aria-hidden
-              >
-                Photo
-              </div>
+              />
               <div>
                 <p className="text-lg font-medium">{person.firstName}</p>
                 <p className="text-lg text-zinc-600">{person.lastName}</p>
