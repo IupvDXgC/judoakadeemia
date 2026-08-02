@@ -5,7 +5,7 @@ import React, { useMemo, useState } from "react";
 type Contact = {
   firstname: string;
   lastname: string;
-  personalCode: string;
+  ssn: string;
   phone: string;
   email: string;
 };
@@ -52,7 +52,7 @@ const initial: FormState = {
       {
         firstname: "",
         lastname: "",
-        personalCode: "",
+        ssn: "",
         phone: "",
         email: "",
       },
@@ -99,6 +99,34 @@ function SuccessMessage() {
   );
 }
 
+function isBlank(value: string | number | null | undefined) {
+  return value === null || value === undefined || String(value).trim() === "";
+}
+
+/** Returns Estonian labels of empty required fields, or [] if valid. */
+function getMissingFields(form: FormState): string[] {
+  const contact = form.contacts.others[0];
+  const missing: string[] = [];
+
+  if (isBlank(form.firstname)) missing.push("Sportlase eesnimi");
+  if (isBlank(form.lastname)) missing.push("Sportlase perekonnanimi");
+  if (isBlank(form.gender)) missing.push("Sugu");
+  if (isBlank(form.birthday)) missing.push("Sünnikuupäev");
+  if (isBlank(form.language)) missing.push("Keel");
+  if (isBlank(form.ssn)) missing.push("Sportlase isikukood");
+
+  if (isBlank(contact?.firstname)) missing.push("Kontaktisiku eesnimi");
+  if (isBlank(contact?.lastname)) missing.push("Kontaktisiku perekonnanimi");
+  if (isBlank(contact?.ssn)) missing.push("Kontaktisiku isikukood");
+  if (isBlank(contact?.email)) missing.push("Kontaktisiku e-mail");
+  if (isBlank(contact?.phone)) missing.push("Kontaktisiku telefon");
+
+  if (isBlank(form.group_id)) missing.push("Treeninggrupp");
+  if (isBlank(form.howDidYouFindUs)) missing.push("Kuidas sa meid leidsid");
+
+  return missing;
+}
+
 export default function MembershipForm() {
   const [form, setForm] = useState<FormState>(initial);
 
@@ -132,19 +160,25 @@ export default function MembershipForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
     setSubmitError(null);
+
+    const missing = getMissingFields(form);
+    if (missing.length > 0) {
+      setSubmitError(`Palun täida: ${missing.join(", ")}`);
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       const response = await fetch("/api/sportlyzer", {
-          method: "POST",
-          headers: {
-            Accept: "application/json, text/plain, */*",
-            "Content-Type": "application/json;charset=utf-8",
-          },
-          body: JSON.stringify(payload),
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=utf-8",
         },
-      );
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         throw new Error(`Request failed (${response.status})`);
@@ -222,8 +256,9 @@ export default function MembershipForm() {
                   value={form.language}
                   onChange={(e) => setField("language", e.target.value)}
               >
-                <option value="male">Eesti</option>
-                <option value="female">Inglise</option>
+                <option value="">Vali keel</option>
+                <option value="et">Eesti</option>
+                <option value="en">Inglise</option>
               </select>
             </label>
 
@@ -231,8 +266,8 @@ export default function MembershipForm() {
               <span className="mb-1 block text-sm font-medium text-zinc-700">Isikukood</span>
               <input
                   className="block w-full rounded border border-zinc-200 bg-white p-2 text-sm"
-                  value={form.personalCode}
-                  onChange={(e) => setField("lastname", e.target.value)}
+                  value={form.ssn}
+                  onChange={(e) => setField("ssn", e.target.value)}
               />
             </label>
           </div>
@@ -262,8 +297,8 @@ export default function MembershipForm() {
                 <span className="mb-1 block text-sm font-medium text-zinc-700">Isikukood</span>
                 <input
                     className="block w-full rounded border border-zinc-200 bg-white p-2 text-sm"
-                    value={contact0?.phone ?? ""}
-                    onChange={(e) => setOtherContact(0, {phone: e.target.value})}
+                    value={contact0?.ssn ?? ""}
+                    onChange={(e) => setOtherContact(0, {ssn: e.target.value})}
                 />
               </label>
 
@@ -280,50 +315,38 @@ export default function MembershipForm() {
               <label className="block md:col-span-2">
                 <span className="mb-1 block text-sm font-medium text-zinc-700">Telefon</span>
                 <input
-                    type="email"
+                    type="text"
                     className="block w-full rounded border border-zinc-200 bg-white p-2 text-sm"
-                    value={contact0?.email ?? ""}
-                    onChange={(e) => setOtherContact(0, {email: e.target.value})}
+                    value={contact0?.phone ?? ""}
+                    onChange={(e) => setOtherContact(0, {phone: e.target.value})}
                 />
               </label>
             </div>
           </div>
 
           <div>
-            <h3 className="mb-2 text-lg font-semibold">Muu</h3>
-            <div className="grid gap-4 md:grid-cols-1">
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-zinc-700">Eesnimi</span>
-                <input
-                    className="block w-full rounded border border-zinc-200 bg-white p-2 text-sm"
-                    value={contact0?.firstname ?? ""}
-                    onChange={(e) => setOtherContact(0, {firstname: e.target.value})}
-                />
-              </label>
 
-              <label className="block md:col-span-2">
-                <span className="mb-1 block text-sm font-medium text-zinc-700">Telefon</span>
-                <input
-                    type="email"
-                    className="block w-full rounded border border-zinc-200 bg-white p-2 text-sm"
-                    value={contact0?.email ?? ""}
-                    onChange={(e) => setOtherContact(0, {email: e.target.value})}
-                />
-              </label>
-            </div>
+            <h3 className="mb-2 text-lg font-semibold">Muu</h3>
+
           </div>
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-zinc-700">Vali treeninggrupp</span>
             <select
                 className="block w-full rounded border border-zinc-200 bg-white p-2 text-sm"
-                value={form.groupName}
-                onChange={(e) => setField("gender", e.target.value)}
+                value={form.group_id}
+                onChange={(e) => setField("group_id", Number(e.target.value))}
             >
-              <option value="male">Algajad</option>
-              <option value="female">Proffessionaalid</option>
+              <option value="82425">ALGAJAD (HOMMIKUNE) </option>
+              <option value="82423">ALGAJAD 1</option>
+              <option value="82884">ALGAJAD 2</option>
+              <option value="82422">EDASIJÕUDNUD</option>
+              <option value="82421">ELITE ATHLETES</option>
+              <option value="82424">MINI JUDO (4-5 aastased)</option>
+              <option value="84408">MINI-JUDO (5-6 aastased)</option>
             </select>
           </label>
 
+          {/*
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-zinc-700">Soovin saada ürituste meeldetuletusi ja uuendusi</span>
             <select
@@ -335,6 +358,7 @@ export default function MembershipForm() {
               <option value="female">Ainult läbi telefoni teavituste</option>
             </select>
           </label>
+          */}
 
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-zinc-700">Kuidas sa meid leidsid?</span>
@@ -343,13 +367,14 @@ export default function MembershipForm() {
                 value={form.howDidYouFindUs}
                 onChange={(e) => setField("howDidYouFindUs", e.target.value)}
             >
-              <option value="male">Internet</option>
-              <option value="female">Sõbrad</option>
-              <option value="female">Muu</option>
-              <option value="female">Kool/Lasteaed</option>
-              <option value="female">Välireklaam</option>
-              <option value="female">Sotsiaalmeedia</option>
-              <option value="female">Flaierid/Bännerid</option>
+              <option value="">Vali</option>
+              <option value="internet">Internet</option>
+              <option value="friends">Sõbrad</option>
+              <option value="other">Muu</option>
+              <option value="school">Kool/Lasteaed</option>
+              <option value="ad">Välireklaam</option>
+              <option value="social">Sotsiaalmeedia</option>
+              <option value="banner">Flaierid/Bännerid</option>
             </select>
           </label>
 
