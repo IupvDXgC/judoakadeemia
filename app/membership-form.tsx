@@ -336,13 +336,14 @@ export default function MembershipForm() {
                 value={form.group_id}
                 onChange={(e) => setField("group_id", Number(e.target.value))}
             >
-              <option value="82425">ALGAJAD (HOMMIKUNE) </option>
-              <option value="82423">ALGAJAD 1</option>
-              <option value="82884">ALGAJAD 2</option>
-              <option value="82422">EDASIJÕUDNUD</option>
+              <option value="82423">ALGAJAD</option>
+              <option value="82422">EDASIJÕUDNUD 1</option>
+              <option value="93423">EDASIJÕUDNUD 2</option>
               <option value="82421">ELITE ATHLETES</option>
               <option value="82424">MINI JUDO (4-5 aastased)</option>
+              <option value="93424">MINI-JUDO</option>
               <option value="84408">MINI-JUDO (5-6 aastased)</option>
+              <option value="93426">SEMI-PRO</option>
             </select>
           </label>
 
