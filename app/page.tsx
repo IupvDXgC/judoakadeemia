@@ -3,6 +3,7 @@ import Contact from "./contact";
 import Header from "./header";
 import Home from "./home";
 import JoinUs from "./join-us-section";
+import References from "./references";
 
 export default function Page() {
   return (
@@ -13,6 +14,7 @@ export default function Page() {
         <About />
         <Contact />
         <JoinUs />
+        <References/>
       </main>
     </>
   );

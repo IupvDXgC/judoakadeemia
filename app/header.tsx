@@ -8,6 +8,7 @@ const links = [
   { href: "/join-us", label: "Liikmetaotlus" },
   { href: "/#contact", label: "Meie tiim" },
   { href: "/groups", label: "Treeningrühmad" },
+  { href: "/#references", label: "Kontakt" },
 ];
 
 export default function Header() {
